@@ -24,6 +24,9 @@ class NonlinearController(object):
         self.k_p_p = 8
         self.k_p_q = 8
         self.k_p_r = 4
+        # altitude control
+        self.k_p_z = 64
+        self.k_d_z = 15
 
         self.k_p_body_rate = np.array([self.k_p_p, self.k_p_q, self.k_p_r], dtype=np.float)
 
@@ -100,7 +103,17 @@ class NonlinearController(object):
             
         Returns: thrust command for the vehicle (+up)
         """
-        return 0.0
+        rot_mat = euler2RM(*attitude)
+        b_z = rot_mat[2, 2]
+
+        e_z = altitude_cmd - altitude
+        e_z_dot = vertical_velocity_cmd - vertical_velocity
+        net_z_dot_dot_c = self.k_p_z * e_z + self.k_d_z * e_z_dot + acceleration_ff
+
+        z_dot_dot_c = net_z_dot_dot_c - GRAVITY
+        thrust = (z_dot_dot_c / b_z) * -GRAVITY
+
+        return thrust
 
     def roll_pitch_controller(self, acceleration_cmd, attitude, thrust_cmd):
         """ Generate the rollrate and pitchrate commands in the body frame
