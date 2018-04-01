@@ -83,10 +83,15 @@ class ControlsFlyer(UnityDrone):
         self.body_rate_target = np.array(
                 [roll_pitch_rate_cmd[0], roll_pitch_rate_cmd[1], yawrate_cmd])
         
-    def bodyrate_controller(self):        
+    def bodyrate_controller(self):
         moment_cmd = self.controller.body_rate_control(
                 self.body_rate_target,
                 self.gyro_raw)
+        # testing code:
+        # moment_cmd = self.controller.body_rate_control(
+        #     np.array([0, 0, 0], dtype=np.float),
+        #     self.gyro_raw
+        # )
         self.cmd_moment(moment_cmd[0],
                         moment_cmd[1],
                         moment_cmd[2],
@@ -159,7 +164,7 @@ class ControlsFlyer(UnityDrone):
 
     def takeoff_transition(self):
         print("takeoff transition")
-        target_altitude = 3.0
+        target_altitude = 5
         self.target_position[2] = target_altitude
         self.takeoff(target_altitude)
         self.flight_state = States.TAKEOFF

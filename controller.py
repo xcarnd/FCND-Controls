@@ -20,7 +20,12 @@ class NonlinearController(object):
 
     def __init__(self):
         """Initialize the controller object and control gains"""
-        return
+        # body rate control
+        self.k_p_p = 8
+        self.k_p_q = 8
+        self.k_p_r = 4
+
+        self.k_p_body_rate = np.array([self.k_p_p, self.k_p_q, self.k_p_r], dtype=np.float)
 
     def trajectory_control(self, position_trajectory, yaw_trajectory, time_trajectory, current_time):
         """Generate a commanded position, velocity and yaw based on the trajectory
@@ -118,7 +123,12 @@ class NonlinearController(object):
             
         Returns: 3-element numpy array, desired roll moment, pitch moment, and yaw moment commands in Newtons*meters
         """
-        return np.array([0.0, 0.0, 0.0])
+        e = body_rate_cmd - body_rate
+        # print(body_rate_cmd, body_rate)
+        angular_acc = self.k_p_body_rate * e
+        tau = MOI * angular_acc
+        # print("Tau: ", tau)
+        return tau
 
     def yaw_control(self, yaw_cmd, yaw):
         """ Generate the target yawrate
