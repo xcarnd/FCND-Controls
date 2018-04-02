@@ -51,6 +51,8 @@ class ControlsFlyer(UnityDrone):
         # flight history
         self.target_log = []
         self.actual_log = []
+        self.target_pqr = []
+        self.actual_pqr = []
 
     def position_controller(self):  
         (self.local_position_target,
@@ -91,6 +93,8 @@ class ControlsFlyer(UnityDrone):
         moment_cmd = self.controller.body_rate_control(
                 self.body_rate_target,
                 self.gyro_raw)
+        self.target_pqr.append(self.body_rate_target)
+        self.actual_pqr.append(self.gyro_raw)
         self.cmd_moment(moment_cmd[0],
                         moment_cmd[1],
                         moment_cmd[2],
@@ -195,7 +199,7 @@ class ControlsFlyer(UnityDrone):
 
     def write_flight_log(self):
         import pickle
-        logs = [self.target_log, self.actual_log]
+        logs = [self.target_log, self.actual_log, self.target_pqr, self.actual_pqr]
         with open('flight_log', 'wb') as f:
             pickle.dump(logs, f)
 

@@ -21,9 +21,9 @@ class NonlinearController(object):
     def __init__(self):
         """Initialize the controller object and control gains"""
         # body rate control
-        self.k_p_p = 8
-        self.k_p_q = 8
-        self.k_p_r = 4
+        self.k_p_p = 16
+        self.k_p_q = 16
+        self.k_p_r = 8
         # altitude control
         self.k_p_z = 4
         self.k_d_z = 3.6

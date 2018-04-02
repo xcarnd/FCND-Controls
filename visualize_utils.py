@@ -28,38 +28,16 @@ def visualize_planned_trajectory(traj, executed=None):
     plt.show()
 
 
-def visualize_lateral_trajectory(traj, executed=None):
-    traj = np.array(traj)
-    fig = plt.figure()
-    ax = fig.gca()
-    plt.title('Flight path').set_fontsize(20)
-    ax.set_xlabel('NORTH')
-    ax.set_ylabel('EAST')
-
-    legend = ['Planned']
-    ax.plot(traj[:, 0], traj[:, 1], c='b')
-
-    if executed is not None:
-        executed = np.array(executed)
-        ax.plot(executed[:, 0], executed[:, 1], c='r')
-        legend.append('Executed')
-
-    plt.legend(legend, fontsize=14)
-    plt.show()
-
-
-def visualize_altitude_trajectory(target, actual):
-    target = np.array(target)
-    actual = np.array(actual)
+def visualize_axial_trajectory(target, actual, axis=2):
     fig = plt.figure()
     ax = fig.gca()
     plt.title('Flight path').set_fontsize(20)
     ax.set_xlabel('Time')
-    ax.set_ylabel('-Down')
+    ax.set_ylabel('Value')
 
     legend = ['Target', 'Actual']
-    ax.plot(np.arange(target.shape[0]), -target[:, 2], c='r')
-    ax.plot(np.arange(actual.shape[0]), -actual[:, 2], c='g')
+    ax.plot(np.arange(target.shape[0]), target[:, axis], c='r')
+    ax.plot(np.arange(actual.shape[0]), actual[:, axis], c='g')
 
     plt.legend(legend, fontsize=14)
     plt.show()
@@ -68,5 +46,5 @@ def visualize_altitude_trajectory(target, actual):
 if __name__ == '__main__':
     with open('flight_log', 'rb') as f:
         all_logs = pickle.load(f)
-    target, actual = all_logs
-    visualize_altitude_trajectory(target, actual)
+    target_traj, actual_traj, target_pqr, actual_pqr = all_logs
+    visualize_axial_trajectory(np.array(target_pqr), np.array(actual_pqr), axis=2)
