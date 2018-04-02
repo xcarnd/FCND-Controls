@@ -49,15 +49,12 @@ class ControlsFlyer(UnityDrone):
         self.register_callback(MsgID.RAW_GYROSCOPE, self.gyro_callback)
         
     def position_controller(self):  
-        # (self.local_position_target,
-        #  self.local_velocity_target,
-        #  yaw_cmd) = self.controller.trajectory_control(
-        #          self.position_trajectory,
-        #          self.yaw_trajectory,
-        #          self.time_trajectory, time.time())
-        self.local_position_target = [20, 0, -5]
-        self.local_velocity_target = [0, 0, 0]
-        yaw_cmd = 0
+        (self.local_position_target,
+         self.local_velocity_target,
+         yaw_cmd) = self.controller.trajectory_control(
+                 self.position_trajectory,
+                 self.yaw_trajectory,
+                 self.time_trajectory, time.time())
         self.attitude_target = np.array((0.0, 0.0, yaw_cmd))
         acceleration_cmd = self.controller.lateral_position_control(
                 self.local_position_target[0:2],
