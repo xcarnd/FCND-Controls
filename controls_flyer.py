@@ -67,7 +67,7 @@ class ControlsFlyer(UnityDrone):
         
     def attitude_controller(self):
         target_p = np.array([0, 0, -5], dtype=np.float)
-        target_v = np.array([1, 0, 0], dtype=np.float)
+        target_v = np.array([0, 0, 0], dtype=np.float)
         self.thrust_cmd = self.controller.altitude_control(
                 -target_p[2],
                 0,
@@ -80,9 +80,8 @@ class ControlsFlyer(UnityDrone):
                 self.attitude,
                 self.thrust_cmd)
         yawrate_cmd = self.controller.yaw_control(
-                self.attitude_target[2],
+                0.0,
                 self.attitude[2])
-        yawrate_cmd = 0
         self.body_rate_target = np.array(
                 [roll_pitch_rate_cmd[0], roll_pitch_rate_cmd[1], yawrate_cmd])
         

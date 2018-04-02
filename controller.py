@@ -29,9 +29,9 @@ class NonlinearController(object):
         self.k_d_z = 3.6
         # yaw control
         self.k_p_yaw = 3
-        # roll-pitch controller
-        self.k_p_roll = 0
-        self.k_p_pitch = 2
+        # roll-pitch control
+        self.k_p_roll = 3
+        self.k_p_pitch = 3
 
         self.k_p_body_rate = np.array([self.k_p_p, self.k_p_q, self.k_p_r], dtype=np.float)
         self.k_p_rp = np.array([self.k_p_roll, self.k_p_pitch], dtype=np.float)
@@ -131,24 +131,20 @@ class NonlinearController(object):
             
         Returns: 2-element numpy array, desired rollrate (p) and pitchrate (q) commands in radians/s
         """
-        # rot_mat = euler2RM(*attitude)
-        # b = rot_mat[0:2, 2]
-        # c_c = thrust_cmd / GRAVITY
-        # b_c = acceleration_cmd / c_c
-        # print(thrust_cmd, c_c, b_c)
-        #
-        # e_b = b_c - b
-        # b_c_dot = self.k_p_rp * e_b
-        # print("Error: ", e_b, "element: ", b_c_dot)
-        #
-        # r = np.array([[rot_mat[1, 0], -rot_mat[0, 0]],
-        #               [rot_mat[1, 1], -rot_mat[0, 1]]],
-        #              dtype=np.float)
-        #
-        # pq_c = np.dot(r, b_c_dot) / rot_mat[2, 2]
-        # print("PQ rate:", pq_c)
-        # return pq_c
-        return np.array([0.0, 0.0])
+        rot_mat = euler2RM(*attitude)
+        b = rot_mat[0:2, 2]
+        c_c = -thrust_cmd / DRONE_MASS_KG
+        b_c = acceleration_cmd / c_c
+
+        e_b = b_c - b
+        b_c_dot = self.k_p_rp * e_b
+
+        r = np.array([[rot_mat[1, 0], -rot_mat[0, 0]],
+                      [rot_mat[1, 1], -rot_mat[0, 1]]],
+                     dtype=np.float)
+
+        pq_c = np.dot(r, b_c_dot) / rot_mat[2, 2]
+        return pq_c
 
     def body_rate_control(self, body_rate_cmd, body_rate):
         """ Generate the roll, pitch, yaw moment commands in the body frame
