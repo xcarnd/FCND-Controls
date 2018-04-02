@@ -15,7 +15,7 @@ from unity_drone import UnityDrone
 from controller import NonlinearController
 from udacidrone.connection import MavlinkConnection  # noqa: F401
 from udacidrone.messaging import MsgID
-
+from visualize_utils import visualize_planned_trajectory
 
 class States(Enum):
     MANUAL = 0
@@ -47,7 +47,11 @@ class ControlsFlyer(UnityDrone):
         
         self.register_callback(MsgID.ATTITUDE, self.attitude_callback)
         self.register_callback(MsgID.RAW_GYROSCOPE, self.gyro_callback)
-        
+
+        # flight history
+        self.target_log = []
+        self.actual_log = []
+
     def position_controller(self):  
         (self.local_position_target,
          self.local_velocity_target,
@@ -125,6 +129,8 @@ class ControlsFlyer(UnityDrone):
                 if abs(self.local_position[2]) < 0.01:
                     self.disarming_transition()
         if self.flight_state == States.WAYPOINT:
+            self.target_log.append(self.local_position_target)
+            self.actual_log.append(self.local_position)
             self.position_controller()
 
     def state_callback(self):
@@ -187,6 +193,12 @@ class ControlsFlyer(UnityDrone):
         self.in_mission = False
         self.flight_state = States.MANUAL
 
+    def write_flight_log(self):
+        import pickle
+        logs = [self.target_log, self.actual_log]
+        with open('flight_log', 'wb') as f:
+            pickle.dump(logs, f)
+
     def start(self):
         self.start_log("Logs", "NavLog.txt")
         # self.connect()
@@ -201,6 +213,7 @@ class ControlsFlyer(UnityDrone):
         #    pass
 
         self.stop_log()
+        self.write_flight_log()
 
 
 if __name__ == "__main__":
