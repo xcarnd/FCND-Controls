@@ -191,5 +191,7 @@ class NonlinearController(object):
             yaw_cmd = yaw_cmd + direction * 2 * np.pi
         e_yaw = yaw_cmd - yaw
         if np.abs(e_yaw) > np.pi:
-            e_yaw = e_yaw - 2 * np.pi
+            direction = -1 if e_yaw > 0 else 1
+            e_yaw = e_yaw + direction * 2 * np.pi
+        print("yaw_cmd: {}, yaw: {}, E_yaw: {}".format(yaw_cmd, yaw, e_yaw))
         return self.k_p_yaw * e_yaw
