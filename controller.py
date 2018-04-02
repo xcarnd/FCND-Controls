@@ -168,14 +168,12 @@ class NonlinearController(object):
         Returns: 3-element numpy array, desired roll moment, pitch moment, and yaw moment commands in Newtons*meters
         """
         e = body_rate_cmd - body_rate
-        # print(body_rate_cmd, body_rate)
         angular_acc = self.k_p_body_rate * e
         tau = MOI * angular_acc
         k = MAX_TORQUE / np.linalg.norm(tau)
         if k < 1:
             tau *= k
         tau = np.clip(tau, -MAX_TORQUE, MAX_TORQUE)
-        print("Tau: ", tau)
         return tau
 
     def yaw_control(self, yaw_cmd, yaw):
