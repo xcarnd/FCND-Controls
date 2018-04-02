@@ -77,12 +77,11 @@ class ControlsFlyer(UnityDrone):
         #         self.local_acceleration_target[0:2],
         #         self.attitude,
         #         self.thrust_cmd)
-        # yawrate_cmd = self.controller.yaw_control(
-        #         self.attitude_target[2],
-        #         self.attitude[2])
+        yawrate_cmd = self.controller.yaw_control(
+                -1.57,
+                self.attitude[2])
         # testing code
         roll_pitch_rate_cmd = 0, 0
-        yawrate_cmd = 0
         self.body_rate_target = np.array(
                 [roll_pitch_rate_cmd[0], roll_pitch_rate_cmd[1], yawrate_cmd])
         

@@ -27,6 +27,8 @@ class NonlinearController(object):
         # altitude control
         self.k_p_z = 64
         self.k_d_z = 15
+        # yaw control
+        self.k_p_yaw = 3
 
         self.k_p_body_rate = np.array([self.k_p_p, self.k_p_q, self.k_p_r], dtype=np.float)
 
@@ -152,4 +154,11 @@ class NonlinearController(object):
         
         Returns: target yawrate in radians/sec
         """
-        return 0.0
+        # note: yaw must be within [-pi, pi)
+        while np.abs(yaw_cmd) > np.pi:
+            direction = -1 if yaw_cmd > np.pi else 1
+            yaw_cmd = yaw_cmd + direction * 2 * np.pi
+        e_yaw = yaw_cmd - yaw
+        if np.abs(e_yaw) > np.pi:
+            e_yaw = e_yaw - 2 * np.pi
+        return self.k_p_yaw * e_yaw
