@@ -124,12 +124,12 @@ class NonlinearController(object):
 
         e_z = altitude_cmd - altitude
         e_z_dot = vertical_velocity_cmd - vertical_velocity
-        net_z_dot_dot_c = self.k_p_z * e_z + self.k_d_z * e_z_dot + acceleration_ff
-
-        z_dot_dot_c = net_z_dot_dot_c - GRAVITY
+        z_dot_dot_c = self.k_p_z * e_z + self.k_d_z * e_z_dot + acceleration_ff
         c_c = z_dot_dot_c / b_z
         thrust = c_c * DRONE_MASS_KG
         thrust = np.clip(thrust, 0.1, MAX_THRUST)
+        # print("target alt: {}, current alt: {}, z_dd_c: {}, thrust:{}".format(altitude_cmd, altitude, z_dot_dot_c,
+        # thrust))
 
         return thrust
 
@@ -193,5 +193,5 @@ class NonlinearController(object):
         if np.abs(e_yaw) > np.pi:
             direction = -1 if e_yaw > 0 else 1
             e_yaw = e_yaw + direction * 2 * np.pi
-        print("yaw_cmd: {}, yaw: {}, E_yaw: {}".format(yaw_cmd, yaw, e_yaw))
+        # print("yaw_cmd: {}, yaw: {}, E_yaw: {}".format(yaw_cmd, yaw, e_yaw))
         return self.k_p_yaw * e_yaw
