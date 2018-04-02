@@ -127,7 +127,9 @@ class NonlinearController(object):
         net_z_dot_dot_c = self.k_p_z * e_z + self.k_d_z * e_z_dot + acceleration_ff
 
         z_dot_dot_c = net_z_dot_dot_c - GRAVITY
-        thrust = z_dot_dot_c / b_z * DRONE_MASS_KG
+        c_c = z_dot_dot_c / b_z
+        thrust = c_c * DRONE_MASS_KG
+        thrust = np.clip(thrust, 0.1, MAX_THRUST)
 
         return thrust
 
@@ -169,7 +171,11 @@ class NonlinearController(object):
         # print(body_rate_cmd, body_rate)
         angular_acc = self.k_p_body_rate * e
         tau = MOI * angular_acc
-        # print("Tau: ", tau)
+        k = MAX_TORQUE / np.linalg.norm(tau)
+        if k < 1:
+            tau *= k
+        tau = np.clip(tau, -MAX_TORQUE, MAX_TORQUE)
+        print("Tau: ", tau)
         return tau
 
     def yaw_control(self, yaw_cmd, yaw):

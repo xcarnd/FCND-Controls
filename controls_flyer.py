@@ -55,8 +55,8 @@ class ControlsFlyer(UnityDrone):
         #          self.position_trajectory,
         #          self.yaw_trajectory,
         #          self.time_trajectory, time.time())
-        self.local_position_target = [10, 0, -5]
-        self.local_velocity_target = [2, 0, 0]
+        self.local_position_target = [20, 0, -5]
+        self.local_velocity_target = [0, 0, 0]
         yaw_cmd = 0
         self.attitude_target = np.array((0.0, 0.0, yaw_cmd))
         acceleration_cmd = self.controller.lateral_position_control(
