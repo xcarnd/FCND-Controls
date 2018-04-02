@@ -49,12 +49,15 @@ class ControlsFlyer(UnityDrone):
         self.register_callback(MsgID.RAW_GYROSCOPE, self.gyro_callback)
         
     def position_controller(self):  
-        (self.local_position_target,
-         self.local_velocity_target,
-         yaw_cmd) = self.controller.trajectory_control(
-                 self.position_trajectory,
-                 self.yaw_trajectory,
-                 self.time_trajectory, time.time())
+        # (self.local_position_target,
+        #  self.local_velocity_target,
+        #  yaw_cmd) = self.controller.trajectory_control(
+        #          self.position_trajectory,
+        #          self.yaw_trajectory,
+        #          self.time_trajectory, time.time())
+        self.local_position_target = [10, 0, -5]
+        self.local_velocity_target = [2, 0, 0]
+        yaw_cmd = 0
         self.attitude_target = np.array((0.0, 0.0, yaw_cmd))
         acceleration_cmd = self.controller.lateral_position_control(
                 self.local_position_target[0:2],
@@ -64,27 +67,25 @@ class ControlsFlyer(UnityDrone):
         self.local_acceleration_target = np.array([acceleration_cmd[0],
                                                    acceleration_cmd[1],
                                                    0.0])
-        
+
     def attitude_controller(self):
-        target_p = np.array([0, 0, -5], dtype=np.float)
-        target_v = np.array([0, 0, 0], dtype=np.float)
         self.thrust_cmd = self.controller.altitude_control(
-                -target_p[2],
-                0,
+                -self.local_position_target[2],
+                -self.local_velocity_target[2],
                 -self.local_position[2],
                 -self.local_velocity[2],
                 self.attitude,
                 9.81)
         roll_pitch_rate_cmd = self.controller.roll_pitch_controller(
-                target_v[0:2],
+                self.local_acceleration_target[0:2],
                 self.attitude,
                 self.thrust_cmd)
         yawrate_cmd = self.controller.yaw_control(
-                0.0,
+                self.attitude_target[2],
                 self.attitude[2])
         self.body_rate_target = np.array(
                 [roll_pitch_rate_cmd[0], roll_pitch_rate_cmd[1], yawrate_cmd])
-        
+
     def bodyrate_controller(self):
         moment_cmd = self.controller.body_rate_control(
                 self.body_rate_target,
@@ -93,11 +94,11 @@ class ControlsFlyer(UnityDrone):
                         moment_cmd[1],
                         moment_cmd[2],
                         self.thrust_cmd)
-    
+
     def attitude_callback(self):
         if self.flight_state == States.WAYPOINT:
             self.attitude_controller()
-    
+
     def gyro_callback(self):
         if self.flight_state == States.WAYPOINT:
             self.bodyrate_controller()
@@ -155,13 +156,13 @@ class ControlsFlyer(UnityDrone):
         # set the current location to be the home position
         self.set_home_position(self.global_position[0],
                                self.global_position[1],
-                               self.global_position[2])  
+                               self.global_position[2])
 
         self.flight_state = States.ARMING
 
     def takeoff_transition(self):
         print("takeoff transition")
-        target_altitude = 5
+        target_altitude = 3.0
         self.target_position[2] = target_altitude
         self.takeoff(target_altitude)
         self.flight_state = States.TAKEOFF

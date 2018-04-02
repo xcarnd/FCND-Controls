@@ -32,9 +32,16 @@ class NonlinearController(object):
         # roll-pitch control
         self.k_p_roll = 3
         self.k_p_pitch = 3
+        # lateral control
+        self.k_p_x = 1
+        self.k_d_x = 1.4
+        self.k_p_y = 1
+        self.k_d_y = 1.4
 
         self.k_p_body_rate = np.array([self.k_p_p, self.k_p_q, self.k_p_r], dtype=np.float)
         self.k_p_rp = np.array([self.k_p_roll, self.k_p_pitch], dtype=np.float)
+        self.k_p_xy = np.array([self.k_p_x, self.k_p_y], dtype=np.float)
+        self.k_d_xy = np.array([self.k_d_x, self.k_d_y], dtype=np.float)
 
     def trajectory_control(self, position_trajectory, yaw_trajectory, time_trajectory, current_time):
         """Generate a commanded position, velocity and yaw based on the trajectory
@@ -94,7 +101,10 @@ class NonlinearController(object):
             
         Returns: desired vehicle 2D acceleration in the local frame [north, east]
         """
-        return np.array([0.0, 0.0])
+        e_position = local_position_cmd - local_position
+        e_velocity = local_velocity_cmd - local_velocity
+        acc_cmd = self.k_p_xy * e_position + self.k_d_xy * e_velocity + acceleration_ff
+        return acc_cmd
 
     def altitude_control(self, altitude_cmd, vertical_velocity_cmd, altitude, vertical_velocity, attitude,
                          acceleration_ff=0.0):
