@@ -49,10 +49,12 @@ class ControlsFlyer(UnityDrone):
         self.register_callback(MsgID.RAW_GYROSCOPE, self.gyro_callback)
 
         # flight history
-        self.target_log = []
-        self.actual_log = []
-        self.target_pqr = []
-        self.actual_pqr = []
+        self.target_traj = []
+        self.actual_traj = []
+        self.traj_t = []
+        self.target_v = []
+        self.actual_v = []
+        self.v_t = []
 
     def position_controller(self):  
         (self.local_position_target,
@@ -93,8 +95,6 @@ class ControlsFlyer(UnityDrone):
         moment_cmd = self.controller.body_rate_control(
                 self.body_rate_target,
                 self.gyro_raw)
-        self.target_pqr.append(self.body_rate_target)
-        self.actual_pqr.append(self.gyro_raw)
         self.cmd_moment(moment_cmd[0],
                         moment_cmd[1],
                         moment_cmd[2],
@@ -119,7 +119,10 @@ class ControlsFlyer(UnityDrone):
                 self.waypoint_number = -1
                 self.waypoint_transition()
         elif self.flight_state == States.WAYPOINT:
-
+            t = time.time()
+            self.traj_t.append(t)
+            self.target_traj.append(self.local_position_target)
+            self.actual_traj.append(self.local_position)
             if time.time() > self.time_trajectory[self.waypoint_number]:
                 if len(self.all_waypoints) > 0:
                     self.waypoint_transition()
@@ -133,8 +136,11 @@ class ControlsFlyer(UnityDrone):
                 if abs(self.local_position[2]) < 0.01:
                     self.disarming_transition()
         if self.flight_state == States.WAYPOINT:
-            self.target_log.append(self.local_position_target)
-            self.actual_log.append(self.local_position)
+            # print("target v: {}, actual v: {}".format(np.linalg.norm(self.local_velocity_target), np.linalg.norm(self.local_velocity)))
+            t = time.time()
+            self.v_t.append(t)
+            self.target_v.append(self.local_velocity_target)
+            self.actual_v.append(self.local_velocity)
             self.position_controller()
 
     def state_callback(self):
@@ -199,7 +205,8 @@ class ControlsFlyer(UnityDrone):
 
     def write_flight_log(self):
         import pickle
-        logs = [self.target_log, self.actual_log, self.target_pqr, self.actual_pqr]
+        logs = [self.traj_t, self.target_traj, self.actual_traj,
+                self.v_t, self.target_v, self.actual_v]
         with open('flight_log', 'wb') as f:
             pickle.dump(logs, f)
 

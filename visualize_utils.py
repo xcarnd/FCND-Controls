@@ -28,7 +28,7 @@ def visualize_planned_trajectory(traj, executed=None):
     plt.show()
 
 
-def visualize_axial_trajectory(target, actual, axis=2):
+def visualize_axial_trajectory(t, target, actual, axis=2):
     fig = plt.figure()
     ax = fig.gca()
     plt.title('Flight path').set_fontsize(20)
@@ -36,8 +36,24 @@ def visualize_axial_trajectory(target, actual, axis=2):
     ax.set_ylabel('Value')
 
     legend = ['Target', 'Actual']
-    ax.plot(np.arange(target.shape[0]), target[:, axis], c='r')
-    ax.plot(np.arange(actual.shape[0]), actual[:, axis], c='g')
+    t_start = np.min(t)
+    ax.plot(np.array(t) - t_start, target[:, axis], c='r')
+    ax.plot(np.array(t) - t_start, actual[:, axis], c='g')
+
+    plt.legend(legend, fontsize=14)
+    plt.show()
+
+
+def visualize_axial_error(target, actual, axis=2):
+    fig = plt.figure()
+    ax = fig.gca()
+    plt.title('Error').set_fontsize(20)
+    ax.set_xlabel('Time')
+    ax.set_ylabel('Error')
+
+    legend = ['Target', 'Actual']
+    t_start = np.min(target[:, -1])
+    ax.plot(target[:, -1] - t_start, actual[:, axis] - target[:, axis], c='r')
 
     plt.legend(legend, fontsize=14)
     plt.show()
@@ -46,5 +62,10 @@ def visualize_axial_trajectory(target, actual, axis=2):
 if __name__ == '__main__':
     with open('flight_log', 'rb') as f:
         all_logs = pickle.load(f)
-    target_traj, actual_traj, target_pqr, actual_pqr = all_logs
-    visualize_axial_trajectory(np.array(target_pqr), np.array(actual_pqr), axis=2)
+    traj_t, target_traj, actual_traj, v_t, target_v, actual_v = all_logs
+    visualize_axial_trajectory(
+        traj_t,
+        np.array(target_traj), np.array(actual_traj), axis=1)
+    visualize_axial_trajectory(
+        v_t,
+        np.array(target_v), np.array(actual_v), axis=1)
