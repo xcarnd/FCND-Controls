@@ -21,28 +21,28 @@ class NonlinearController(object):
     def __init__(self):
         """Initialize the controller object and control gains"""
         # body rate control
-        self.k_p_p = 16
-        self.k_p_q = 16
-        self.k_p_r = 10
+        self.k_p_p = 25
+        self.k_p_q = 25
+        self.k_p_r = 6
         # altitude control
-        self.k_p_z = 6
-        self.k_d_z = 3
+        self.k_p_z = 2.6
+        self.k_d_z = 2.0
         # yaw control
-        self.k_p_yaw = 2.0
+        self.k_p_yaw = 4.0
         # roll-pitch control
-        self.k_p_roll = 4.0
-        self.k_p_pitch = 8.0
+        self.k_p_pitch = 6.5
+        self.k_p_roll = 6.5
         # lateral control
         # self.k_p_x = 4.0
         # self.k_d_x = 2.7
         # self.k_p_y = 4.0
         # self.k_d_y = 2.7
         self.k_p_x = 4.0
-        self.k_d_x = 2.8
+        self.k_d_x = 3.2
         self.k_p_y = 4.0
-        self.k_d_y = 2.8
+        self.k_d_y = 3.2
         self.k_p_body_rate = np.array([self.k_p_p, self.k_p_q, self.k_p_r], dtype=np.float)
-        self.k_p_rp = np.array([self.k_p_roll, self.k_p_pitch], dtype=np.float)
+        self.k_p_pr = np.array([self.k_p_pitch, self.k_p_roll], dtype=np.float)
         self.k_p_xy = np.array([self.k_p_x, self.k_p_y], dtype=np.float)
         self.k_d_xy = np.array([self.k_d_x, self.k_d_y], dtype=np.float)
 
@@ -113,7 +113,7 @@ class NonlinearController(object):
         # so we have:
         # b_x_c ^ 2 + b_y_c ^ 2 <= (MAX_THRUST * DRONE_MASS_KG) ^ 2 - (GRAVITY) ^ 2
         # I'll clip acc_cmd to that value.
-        max_allow_acc = np.sqrt((MAX_THRUST / DRONE_MASS_KG) ** 2 - GRAVITY ** 2)
+        max_allow_acc = np.sqrt((MAX_THRUST / DRONE_MASS_KG) ** 2 - GRAVITY ** 2 * 0)
         scale = max_allow_acc / np.linalg.norm(acc_cmd)
         if scale < 1:
             acc_cmd *= scale
@@ -162,22 +162,25 @@ class NonlinearController(object):
         b = rot_mat[0:2, 2]
         c_c = -thrust_cmd / DRONE_MASS_KG
 
-        # if acceleration_cmd > c_c, scale it down
-        scale = abs(c_c) / np.linalg.norm(acceleration_cmd)
-        if scale < 1:
-            acceleration_cmd *= scale
+        # scale = abs(c_c) / np.linalg.norm(acceleration_cmd)
+        # if scale < 1:
+        #     acceleration_cmd *= scale
 
         b_c = acceleration_cmd / c_c
+        b_c = np.clip(b_c, -0.99, 0.99)
         # print("acc", acceleration_cmd, "b,c", b_c)
 
         e_b = b_c - b
-        b_c_dot = self.k_p_rp * e_b
+        # notice the gain is named as k_p_pr here. the first element in e_b
+        # is b_x_c, which need pitching. b_y_c on the other hand, need rolling
+        b_c_dot = self.k_p_pr * e_b
 
         r = np.array([[rot_mat[1, 0], -rot_mat[0, 0]],
                       [rot_mat[1, 1], -rot_mat[0, 1]]],
                      dtype=np.float)
 
         pq_c = np.dot(r, b_c_dot) / rot_mat[2, 2]
+        # print(acceleration_cmd, b_c_dot)
         return pq_c
 
     def body_rate_control(self, body_rate_cmd, body_rate):
