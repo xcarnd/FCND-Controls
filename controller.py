@@ -21,26 +21,26 @@ class NonlinearController(object):
     def __init__(self):
         """Initialize the controller object and control gains"""
         # body rate control
-        self.k_p_p = 25
-        self.k_p_q = 25
-        self.k_p_r = 6
+        self.k_p_p = 20
+        self.k_p_q = 20
+        self.k_p_r = 10
         # altitude control
-        self.k_p_z = 2.6
-        self.k_d_z = 2.0
+        self.k_p_z = 3.6
+        self.k_d_z = 2.1
         # yaw control
-        self.k_p_yaw = 4.0
+        self.k_p_yaw = 2.0
         # roll-pitch control
-        self.k_p_pitch = 6.5
-        self.k_p_roll = 6.5
+        self.k_p_pitch = 5.0
+        self.k_p_roll = 5.0
         # lateral control
         # self.k_p_x = 4.0
         # self.k_d_x = 2.7
         # self.k_p_y = 4.0
         # self.k_d_y = 2.7
         self.k_p_x = 4.0
-        self.k_d_x = 3.2
+        self.k_d_x = 3.0
         self.k_p_y = 4.0
-        self.k_d_y = 3.2
+        self.k_d_y = 3.0
         self.k_p_body_rate = np.array([self.k_p_p, self.k_p_q, self.k_p_r], dtype=np.float)
         self.k_p_pr = np.array([self.k_p_pitch, self.k_p_roll], dtype=np.float)
         self.k_p_xy = np.array([self.k_p_x, self.k_p_y], dtype=np.float)
@@ -113,11 +113,11 @@ class NonlinearController(object):
         # so we have:
         # b_x_c ^ 2 + b_y_c ^ 2 <= (MAX_THRUST * DRONE_MASS_KG) ^ 2 - (GRAVITY) ^ 2
         # I'll clip acc_cmd to that value.
-        max_allow_acc = np.sqrt((MAX_THRUST / DRONE_MASS_KG) ** 2 - GRAVITY ** 2 * 0)
-        scale = max_allow_acc / np.linalg.norm(acc_cmd)
-        if scale < 1:
-            acc_cmd *= scale
-        print(e_position, e_velocity, acc_cmd)
+#        max_allow_acc = np.sqrt((MAX_THRUST / DRONE_MASS_KG) ** 2 - GRAVITY ** 2 * 0)
+        #scale = max_allow_acc / np.linalg.norm(acc_cmd)
+        #if scale < 1:
+        #   acc_cmd *= scale
+        # print(e_position, e_velocity, acc_cmd)
         # print("lateral: cmd: {}, local: {}, error: {}, e_v: {}, acc_ff: {}, acc_cmd: {}".format(local_position_cmd, local_position, e_position, e_velocity, acceleration_ff, acc_cmd))
         return acc_cmd
 
@@ -140,12 +140,15 @@ class NonlinearController(object):
         e_z = altitude_cmd - altitude
         e_z_dot = vertical_velocity_cmd - vertical_velocity
         z_dot_dot_c = self.k_p_z * e_z + self.k_d_z * e_z_dot + acceleration_ff
+        #print("AltC: {}, Alt: {}, Vc: {}, V: {}, Ez: {}, Ezd: {}, Zddc: {}".format(
+        #    altitude_cmd, altitude, vertical_velocity_cmd, vertical_velocity,
+        #    e_z, e_z_dot, z_dot_dot_c))
         c_c = z_dot_dot_c / b_z
         thrust = c_c * DRONE_MASS_KG
         thrust = np.clip(thrust, 0.1, MAX_THRUST)
         # print("target alt: {}, current alt: {}, z_dd_c: {}, thrust:{}".format(altitude_cmd, altitude, z_dot_dot_c,
         #                                                                       thrust))
-
+        #print("Bz: {}, ThrustO: {}, thrust: {}, attitude: {}".format(b_z, c_c * DRONE_MASS_KG, thrust, attitude))
         return thrust
 
     def roll_pitch_controller(self, acceleration_cmd, attitude, thrust_cmd):
@@ -167,7 +170,7 @@ class NonlinearController(object):
         #     acceleration_cmd *= scale
 
         b_c = acceleration_cmd / c_c
-        b_c = np.clip(b_c, -0.99, 0.99)
+        # b_c = np.clip(b_c, -0.99, 0.99)
         # print("acc", acceleration_cmd, "b,c", b_c)
 
         e_b = b_c - b
