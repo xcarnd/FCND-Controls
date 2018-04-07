@@ -30,16 +30,16 @@ class NonlinearController(object):
         # yaw control
         self.k_p_yaw = 2.0
         # roll-pitch control
-        self.k_p_pitch = 5.0
-        self.k_p_roll = 5.0
+        self.k_p_pitch = 6.0
+        self.k_p_roll = 6.0
         # lateral control
         # self.k_p_x = 4.0
         # self.k_d_x = 2.7
         # self.k_p_y = 4.0
         # self.k_d_y = 2.7
-        self.k_p_x = 4.0
+        self.k_p_x = 4.2
         self.k_d_x = 3.0
-        self.k_p_y = 4.0
+        self.k_p_y = 4.2
         self.k_d_y = 3.0
         self.k_p_body_rate = np.array([self.k_p_p, self.k_p_q, self.k_p_r], dtype=np.float)
         self.k_p_pr = np.array([self.k_p_pitch, self.k_p_roll], dtype=np.float)
