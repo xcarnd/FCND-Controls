@@ -33,14 +33,11 @@ class NonlinearController(object):
         self.k_p_pitch = 6.0
         self.k_p_roll = 6.0
         # lateral control
-        # self.k_p_x = 4.0
-        # self.k_d_x = 2.7
-        # self.k_p_y = 4.0
-        # self.k_d_y = 2.7
         self.k_p_x = 4.2
         self.k_d_x = 3.0
         self.k_p_y = 4.2
         self.k_d_y = 3.0
+        # gains arranged in numpy array form
         self.k_p_body_rate = np.array([self.k_p_p, self.k_p_q, self.k_p_r], dtype=np.float)
         self.k_p_pr = np.array([self.k_p_pitch, self.k_p_roll], dtype=np.float)
         self.k_p_xy = np.array([self.k_p_x, self.k_p_y], dtype=np.float)
@@ -107,18 +104,6 @@ class NonlinearController(object):
         e_position = local_position_cmd - local_position
         e_velocity = local_velocity_cmd - local_velocity
         acc_cmd = self.k_p_xy * e_position + self.k_d_xy * e_velocity + acceleration_ff
-        # c_c ^ 2 = b_x_c ^ 2 + b_y_c ^ 2 + b_z_c ^ 2
-        # the maximum value of c_c is MAX_THRUST / DRONE_MASS
-        # the minimum value for b_z_c is GRAVITY (to make the drone at least hover)
-        # so we have:
-        # b_x_c ^ 2 + b_y_c ^ 2 <= (MAX_THRUST * DRONE_MASS_KG) ^ 2 - (GRAVITY) ^ 2
-        # I'll clip acc_cmd to that value.
-#        max_allow_acc = np.sqrt((MAX_THRUST / DRONE_MASS_KG) ** 2 - GRAVITY ** 2 * 0)
-        #scale = max_allow_acc / np.linalg.norm(acc_cmd)
-        #if scale < 1:
-        #   acc_cmd *= scale
-        # print(e_position, e_velocity, acc_cmd)
-        # print("lateral: cmd: {}, local: {}, error: {}, e_v: {}, acc_ff: {}, acc_cmd: {}".format(local_position_cmd, local_position, e_position, e_velocity, acceleration_ff, acc_cmd))
         return acc_cmd
 
     def altitude_control(self, altitude_cmd, vertical_velocity_cmd, altitude, vertical_velocity, attitude,
@@ -165,13 +150,7 @@ class NonlinearController(object):
         b = rot_mat[0:2, 2]
         c_c = -thrust_cmd / DRONE_MASS_KG
 
-        # scale = abs(c_c) / np.linalg.norm(acceleration_cmd)
-        # if scale < 1:
-        #     acceleration_cmd *= scale
-
         b_c = acceleration_cmd / c_c
-        # b_c = np.clip(b_c, -0.99, 0.99)
-        # print("acc", acceleration_cmd, "b,c", b_c)
 
         e_b = b_c - b
         # notice the gain is named as k_p_pr here. the first element in e_b
@@ -197,8 +176,6 @@ class NonlinearController(object):
         """
         e = body_rate_cmd - body_rate
         angular_acc = self.k_p_body_rate * e
-        # clip
-        # angular_acc = np.clip(angular_acc, -6, 6)
         tau = MOI * angular_acc
         tau = np.clip(tau, -MAX_TORQUE, MAX_TORQUE)
         # print("body rate: cmd: {}, rate: {}, tau: {}".format(body_rate_cmd, body_rate, tau))
