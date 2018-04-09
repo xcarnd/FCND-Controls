@@ -23,12 +23,12 @@ class NonlinearController(object):
         # body rate control
         self.k_p_p = 20
         self.k_p_q = 20
-        self.k_p_r = 10
+        self.k_p_r = 3
         # altitude control
         self.k_p_z = 3.6
         self.k_d_z = 2.1
         # yaw control
-        self.k_p_yaw = 2.0
+        self.k_p_yaw = 1.5
         # roll-pitch control
         self.k_p_pitch = 6.0
         self.k_p_roll = 6.0
