@@ -108,7 +108,7 @@ $$
 F_1 + F_2 + F_3 + F_4 & =  F_{thrust} \\
 (F_1 - F_2 - F_3 + F_4) * L & = \tau_x \\
 (F_1 + F_2 - F_3 - F_4) * L & = \tau_y \\
-\tau_1 - \tau_2 + \tau_3 - \tau_4 = -\kappa * (F_1 - F_2 + F_3 - F_4) &= \tau_z \\
+\tau_1 + \tau_2 + \tau_3 + \tau_4 = -\kappa * (F_1 - F_2 + F_3 - F_4) &= \tau_z \\
 \end{aligned}
 $$
 
