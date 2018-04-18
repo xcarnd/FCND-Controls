@@ -89,11 +89,13 @@ For the python part, please refer to function `yaw_control` in L184 -- L202 in `
 
 $$
 \begin{aligned}
-\omega_r = K_p * ((\psi_c - \psi )\;\mathrm{fmod}\; \pi)
+\omega_r = K_p * (\psi_c - \psi)
 \end{aligned}
 $$
 
-Where $\omega_r$ is the angular velocity around the z-axis in body frame. It is the same as angular velocity of yaw angle ($\dot\psi$) in inertial frame. $\psi_c$ and $\psi$ is the commanded yaw angle and actual yaw angle of the drone. $K_p$ is the control gain parameter. $\mathrm{fmod}\;\pi$ is an equivalent operation as $\mathrm{mod}\;N$ in integer arithmetic. If $a = q * \pi + r, |r| < \pi$, then $a\;\mathrm{fmod}\; \pi = r$. All variables above are scalars.
+Where $\omega_r$ is the angular velocity around the z-axis in body frame. It is the same as angular velocity of yaw angle ($\dot\psi$) in inertial frame. $\psi_c$ and $\psi$ is the commanded yaw angle and actual yaw angle of the drone. $K_p$ is the control gain parameter. All variables above are scalars.
+
+An optimization is done for performing $\omega_r$ control. That is, turning in the opposite direction when $|\omega_r| > \pi$.
 
 $\omega_r = \dot\psi$ holds because with Euler angles in Yaw-Pitch-Roll order, rotation about yaw is applied last. It is not affected by roll and/or pitch rotation so can be considered separately.
 
