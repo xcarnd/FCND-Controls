@@ -191,9 +191,7 @@ class NonlinearController(object):
         Returns: target yawrate in radians/sec
         """
         # note: yaw must be within [-pi, pi)
-        while np.abs(yaw_cmd) > np.pi:
-            direction = -1 if yaw_cmd > np.pi else 1
-            yaw_cmd = yaw_cmd + direction * 2 * np.pi
+        yaw_cmd = np.fmod(yaw_cmd + np.pi, 2 * np.pi) - np.pi
         e_yaw = yaw_cmd - yaw
         if np.abs(e_yaw) > np.pi:
             direction = -1 if e_yaw > 0 else 1
